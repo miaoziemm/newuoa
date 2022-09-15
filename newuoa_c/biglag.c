@@ -89,6 +89,7 @@ int biglag(int N, int NPT, double *XOPT, double **XPT, double **BMAT, double **Z
     // Begin the iteration by overwriting S with a vector that has the
     // required length and direction, except that termination occurs if
     // the given D and S are nearly parallel.
+h:    
     ITREC=ITREC+1;
     DD=ZERO;
     SP=ZERO;
@@ -133,10 +134,45 @@ int biglag(int N, int NPT, double *XOPT, double **XPT, double **BMAT, double **Z
     double TAUBEG=CF1+CF2+CF3;
     double TAUMAX=TAUBEG;
     double TAUOLD=TAUBEG;
-    double ANGLE,
+    double ANGLE,CTH,STH,TEMPA,TEMPB;
     int ISAVE=0,IU=49;
     TEMP=TWOPI/(double)(IU+1);
-    
+    for(i=1;i<=IU;i++){
+        ANGLE=(double)i*TEMP;
+        CTH=cos(ANGLE);
+        STH=sin(ANGLE);
+        TAU=CF1+(CF2+CF4*CTH)+(CF3+CF5*CTH)*STH;
+        if(abs(TAU)>abs(TAUMAX)){
+            TAUMAX=TAU;
+            ISAVE=i;
+            TEMPA=TAUOLD;
+        }
+        else if(i == ISAVE+1){
+            TEMPB=TAU;
+        }
+        TAUOLD=TAU;
+    }
+    if(ISAVE==0){TEMPA=TAU;}
+    if(ISAVE==IU){TEMPB=TAUBEG;}
+    double STEP=ZERO;
+    if(TEMPA!=TEMPB){
+        TEMPA=TEMPA-TAUMAX;
+        TEMPB=TEMPB-TAUMAX;
+        STEP=HALF*(TEMPA-TEMPB)/(TEMPA+TEMPB);
+    }
+    ANGLE=TEMP*((double)ISAVE+STEP);
 
-
+    // Calculate the new D and GD. Then test for convergence.
+    CTH=cos(ANGLE);
+    STH=sin(ANGLE);
+    TAU=CF1+(CF2+CF4*CTH)*CTH+(CF3+CF5*CTH)*STH;
+    for(i=0;i<N;i++){
+        D[i]=CTH*D[i]+STH*S[i];
+        GD[i]=CTH*GD[i]+STH*W[i];
+        S[i]=GC[i]+GD[i];
+    }
+    if(abs(TAU)<=1.1*abs(TAUBEG)){goto p;}
+    if(ITREC < N){goto h;}
+p:    
+    return 0;
 }
