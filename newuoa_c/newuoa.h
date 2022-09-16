@@ -12,3 +12,6 @@ double ***matrix3d(int x,int y,int z);
 
 //trsapp
 int trsapp(int N, int NPT, double *XOPT, double **XPT, double *GQ, double *HQ, double *PQ, double DELTA, double *STEP, double *D, double *G, double *HD, double *HS, double CRVMIN);
+
+//biglag
+int biglag(int N, int NPT, double *XOPT, double **XPT, double **BMAT, double **ZMAT, int IDZ, int NDIM, int KNEW, double DELTA, double *D, double ALPHA, double *HCOL, double *GC, double *GD, double *S, double *W);
