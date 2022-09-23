@@ -1,0 +1,1 @@
+gcc main.c bigden.c biglag.c calfun.c matrix.c newuoa.c newuob.c trsapp.c update.c -lm -o test

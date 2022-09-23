@@ -22,6 +22,8 @@ C     should provide a substantial reduction to Q within the trust region.
 C
 C     Initialization, which includes setting HD to H times XOPT.
 C
+c      PRINT 11, XPT(2,1)
+c   11 FORMAT('ahsda2a:',1PD11.4)  
       HALF=0.5D0
       ZERO=0.0D0
       TWOPI=8.0D0*DATAN(1.0D0)
@@ -31,6 +33,8 @@ C
       ITERSW=ITERMAX
       DO 10 I=1,N
    10 D(I)=XOPT(I)
+c      PRINT 12, XOPT(1)
+c12    FORMAT('a11a:',1PD11.4) 
       GOTO 170
 C
 C     Prepare for the first line search.
@@ -43,6 +47,8 @@ C
       G(I)=GQ(I)+HD(I)
       D(I)=-G(I)
    30 DD=DD+D(I)**2
+c      PRINT 11, HD(1),HD(2)
+c   11 FORMAT('ahd2a:',1PD11.4)
       CRVMIN=ZERO
       IF (DD .EQ. ZERO) GOTO 160
       DS=ZERO
@@ -191,6 +197,8 @@ C
       DO 190 J=1,N
   190 TEMP=TEMP+XPT(K,J)*D(J)
       TEMP=TEMP*PQ(K)
+c       PRINT 11, PQ(K)
+c    11 FORMAT('ahsda2a:',1PD11.4)      
       DO 200 I=1,N
   200 HD(I)=HD(I)+TEMP*XPT(K,I)
       IH=0

@@ -39,6 +39,7 @@ C
       NH=(N*NP)/2
       NPTM=NPT-NP
       NFTEST=MAX0(MAXFUN,1)
+      
 C
 C     Set the initial elements of XPT, BMAT, HQ, PQ and ZMAT to zero.
 C
@@ -105,6 +106,9 @@ C
           FOPT=F
           KOPT=NF
       END IF
+
+c      PRINT 11, NF
+c   11 FORMAT('aaa:',I6)
 C
 C     Set the nonzero initial elements of BMAT and the quadratic model in
 C     the cases when NF is at most 2*N+1.
@@ -128,7 +132,9 @@ C
               HQ(IH)=(GQ(NFMM)-TEMP)/RHOBEG
               GQ(NFMM)=HALF*(GQ(NFMM)+TEMP)
           END IF
-C
+c      PRINT 11, RECIQ
+c   11 FORMAT('aaa:',1PD11.4)
+
 C     Set the off-diagonal second derivatives of the Lagrange functions and
 C     the initial quadratic model.
 C
@@ -145,7 +151,8 @@ C
       IF (NF .LT. NPT) GOTO 50
 C
 C     Begin the iterative procedure, because the initial model is complete.
-C
+c      PRINT 11, RHOBEG
+c   11 FORMAT('X[1]', 1PD23.15)
       RHO=RHOBEG
       DELTA=RHO
       IDZ=1
@@ -156,18 +163,34 @@ C
       DO 80 I=1,N
       XOPT(I)=XPT(KOPT,I)
    80 XOPTSQ=XOPTSQ+XOPT(I)**2
+
+c      PRINT 12, XOPT(1)
+c12    FORMAT('a11a:',1PD11.4)  
    90 NFSAV=NF
+
 C
 C     Generate the next trust region step and test its length. Set KNEW
 C     to -1 if the purpose of the next F will be to improve the model.
 C
+
   100 KNEW=0
+c      PRINT 13, NP
+c  13  FORMAT('a11a:',I6)    
+c      PRINT 12, XOPT(1)
+c12    FORMAT('a11a:',1PD11.4)  
       CALL TRSAPP (N,NPT,XOPT,XPT,GQ,HQ,PQ,DELTA,D,W,W(NP),
      1  W(NP+N),W(NP+2*N),CRVMIN)
+c      CALL TRSAPP (N,NPT,XOPT,XPT,GQ,HQ,PQ,DELTA,D,W,W(NP:NP+N),
+c     1  W(NP+N:NP+2*N),CRVMIN)
+c      PRINT 11, XOPT(1)
+c   11 FORMAT('a2a:',1PD11.4)
+
       DSQ=ZERO
       DO 110 I=1,N
   110 DSQ=DSQ+D(I)**2
       DNORM=DMIN1(DELTA,DSQRT(DSQ))
+c      PRINT 11, DNORM
+c   11 FORMAT('a2a:',1PD11.4)
       IF (DNORM .LT. HALF*RHO) THEN
           KNEW=-1
           DELTA=TENTH*DELTA
@@ -251,6 +274,8 @@ C
           CALL BIGLAG (N,NPT,XOPT,XPT,BMAT,ZMAT,IDZ,NDIM,KNEW,DSTEP,
      1      D,ALPHA,VLAG,VLAG(NPT+1),W,W(NP),W(NP+N))
       END IF
+c      PRINT 11, ALPHA
+c   11 FORMAT('aaa:',1PD11.4)
 C
 C     Calculate VLAG and BETA for the current choice of D. The first NPT
 C     components of W_check will be held in W.
@@ -276,8 +301,14 @@ C
       ELSE
           BETA=BETA-SUM*SUM
       END IF
+c      PRINT 11, BETA
+c   11 FORMAT('a2a:',1PD11.4)
       DO 250 I=1,NPT
   250 VLAG(I)=VLAG(I)+SUM*ZMAT(I,K)
+      
+c      PRINT 11, BETA
+c   11 FORMAT('a2a:',1PD11.4)
+
       BSUM=ZERO
       DX=ZERO
       DO 280 J=1,N
@@ -291,26 +322,38 @@ C
       VLAG(JP)=SUM
       BSUM=BSUM+SUM*D(J)
   280 DX=DX+D(J)*XOPT(J)
+
       BETA=DX*DX+DSQ*(XOPTSQ+DX+DX+HALF*DSQ)+BETA-BSUM
       VLAG(KOPT)=VLAG(KOPT)+ONE
+c      PRINT 12, BETA
+c   12 FORMAT('a1a:',1PD11.4)     
 C
 C     If KNEW is positive and if the cancellation in DENOM is unacceptable,
 C     then BIGDEN calculates an alternative model step, XNEW being used for
 C     working space.
 C
+
+c      PRINT 11, XNEW(1)
+c   11 FORMAT('b1:',1PD11.4)
       IF (KNEW .GT. 0) THEN
           TEMP=ONE+ALPHA*BETA/VLAG(KNEW)**2
+       
           IF (DABS(TEMP) .LE. 0.8D0) THEN
               CALL BIGDEN (N,NPT,XOPT,XPT,BMAT,ZMAT,IDZ,NDIM,KOPT,
      1          KNEW,D,W,VLAG,BETA,XNEW,W(NDIM+1),W(6*NDIM+1))
           END IF
       END IF
-C
+c      PRINT 12, XNEW(1)
+c   12 FORMAT('b2:',1PD11.4)
+c      PRINT 11, TEMP
+c   11 FORMAT('a2a:',1PD11.4)
 C     Calculate the next value of the objective function.
 C
   290 DO 300 I=1,N
       XNEW(I)=XOPT(I)+D(I)
   300 X(I)=XBASE(I)+XNEW(I)
+c      PRINT 11, D(1)
+c  11  FORMAT('XNEW',1PD23.15)
       NF=NF+1
   310 IF (NF .GT. NFTEST) THEN
           NF=NF-1
@@ -359,6 +402,8 @@ C
           DO 360 I=1,N
           XOPT(I)=XNEW(I)
   360     XOPTSQ=XOPTSQ+XOPT(I)**2
+c      PRINT 11, XOPT(1)
+c  11  FORMAT('Z',1PD23.15)  
       END IF
       KSAVE=KNEW
       IF (KNEW .GT. 0) GOTO 410
@@ -412,7 +457,12 @@ C     Update BMAT, ZMAT and IDZ, so that the KNEW-th interpolation point
 C     can be moved. Begin the updating of the quadratic model, starting
 C     with the explicit second derivative term.
 C
+   
+c      PRINT 11, VLAG(1)
+c  11  FORMAT('Z',1PD23.15)
   410 CALL UPDATE (N,NPT,BMAT,ZMAT,IDZ,NDIM,VLAG,BETA,KNEW,W)
+c      PRINT 12, VLAG(1)
+c  12  FORMAT('ZN',1PD23.15)     
       FVAL(KNEW)=F
       IH=0
       DO 420 I=1,N

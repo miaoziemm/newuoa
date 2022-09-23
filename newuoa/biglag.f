@@ -42,6 +42,8 @@ C
       DO 20 K=1,NPT
    20 HCOL(K)=HCOL(K)+TEMP*ZMAT(K,J)
       ALPHA=HCOL(KNEW)
+c      PRINT 11, ZMAT(KNEW,10)
+c   11 FORMAT('aaa:',1PD11.4)
 C
 C     Set the unscaled initial direction D. Form the gradient of LFUNC at
 C     XOPT, and multiply D by the second derivative matrix of LFUNC.

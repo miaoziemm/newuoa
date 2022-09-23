@@ -31,6 +31,11 @@ C
           ZMAT(KNEW,J)=ZERO
       END IF
    20 CONTINUE
+
+c      PRINT 11, ZMAT(1,1)
+c  11  FORMAT('Z',1PD23.15)
+
+
 C
 C     Put the first NPT components of the KNEW-th column of HLAG into W,
 C     and calculate the parameters of the updating formula.

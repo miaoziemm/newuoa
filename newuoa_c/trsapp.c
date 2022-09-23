@@ -28,10 +28,10 @@ int trsapp(int N, int NPT, double *XOPT, double **XPT, double *GQ, double *HQ, d
     for(i=0;i<N;i++){
         D[i]=XOPT[i];
     }
-    goto q;
+    goto n170;
 
     // Prepare for the first line search.
-b:
+n20:
     double QRED=ZERO;
     double DD=ZERO;
     for(i=0;i<N;i++){
@@ -42,19 +42,19 @@ b:
       DD=DD+pow(D[i],2);
     }
     CRVMIN=ZERO;
-    if(DD==ZERO){goto p;}
+    if(DD==ZERO){goto n160;}
     double DS=ZERO;
     double SS=ZERO;
     double GG=DD;
     double GGBEG=GG;
 
     // Calculate the step to the trust region boundary and the product HD.
-d:
+n40:
     ITERC=ITERC+1;
     TEMP=DELSQ-SS;
-    double BSTEP=TEMP/(DS+sqrt(DS*DS+DD+TEMP));
-    goto q;
-e:
+    double BSTEP=TEMP/(DS+sqrt(DS*DS+DD*TEMP));
+    goto n170;
+n50:
     double DHD=ZERO;
     for(j=0;j<N;j++){DHD=DHD+D[j]*HD[j];}
 
@@ -80,9 +80,9 @@ e:
 
     // Begin another conjugate direction iteration if required.
     if(ALPHA<BSTEP){
-      if(QADD<=0.01*QRED){goto p;}
-      if(GG<=1.0e-4*GGBEG){goto p;}
-      if(ITERC==ITERMAX){goto p;}
+      if(QADD<=0.01*QRED){goto n160;}
+      if(GG<=1.0e-4*GGBEG){goto n160;}
+      if(ITERC==ITERMAX){goto n160;}
       TEMP=GG/GGSAV;
       DD=ZERO;
       DS=ZERO;
@@ -93,23 +93,23 @@ e:
         DS=DS+D[i]*STEP[i];
         SS=SS+STEP[i]*STEP[i];
       }
-      if(DS<=ZERO){goto p;}
-      if(SS<DELSQ){goto d;}
+      if(DS<=ZERO){goto n160;}
+      if(SS<DELSQ){goto n40;}
     }
     CRVMIN=ZERO;
     ITERSW=ITERC;
 
     // Test whether an alternative iteration is required.
-i:
-    if(GG<=1.0e-4*GGBEG){goto p;}
+n90:
+    if(GG<=1.0e-4*GGBEG){goto n160;}
     double SG=ZERO, SHS=ZERO, SGK;
     for(i=0;i<N;i++){
       SG=SG+STEP[i]*G[i];
       SHS=SHS+STEP[i]*HS[i];
     }
-    SGK=SG/+SHS;
+    SGK=SG+SHS;
     double ANGTEST=SGK/sqrt(GG*DELSQ);
-    if(ANGTEST<=-0.99){goto p;}
+    if(ANGTEST<=-0.99){goto n160;}
 
     // Begin the alternative iteration by calculating D and HD and some scalar products.
     ITERC=ITERC+1;
@@ -117,8 +117,8 @@ i:
     double TEMPA=DELSQ/TEMP;
     double TEMPB=SGK/TEMP;
     for(i=0;i<N;i++){D[i]=TEMPA*(G[i]+HS[i])-TEMPB*STEP[i];}
-    goto q;
-l:    
+    goto n170;
+n120:    
     double DG=ZERO,DHS=ZERO;
     DHD=ZERO;
     for(i=0;i<N;i++){
@@ -172,35 +172,36 @@ l:
     }
     QRED=QRED+REDUC;
     double RATIO=REDUC/QRED;
-    if(ITERC<ITERMAX && RATIO>0.01){goto i;}
-p:
+    if(ITERC<ITERMAX && RATIO>0.01){goto n90;}
+n160:
     return 0;
 
     /* The following instructions act as a subroutine for setting the vector
      HD to the vector D multiplied by the second derivative matrix of Q.
      They are called from three different places, which are distinguished
      by the value of ITERC. */
-q:  
+n170:  
     for(i=0;i<N;i++){HD[i]=ZERO;}
     for(k=0;k<NPT;k++){
       TEMP=ZERO;
       for(j=0;j<N;j++){
         TEMP=TEMP+XPT[k][j]*D[j];
-        TEMP=TEMP*PQ[k];
-        for(i=0;i<N;i++){
-          HD[i]=HD[i]+TEMP*XPT[k][i];
-        }
+        
+      }
+      TEMP=TEMP*PQ[k];
+      for(i=0;i<N;i++){
+        HD[i]=HD[i]+TEMP*XPT[k][i];
       }
     }
     IH=0;
-    for(j=0;j<N;j++){
-      for(i=0;i<j;i++){
+    for(j=0;j<=N-1;j++){
+      for(i=0;i<=j;i++){
         IH=IH+1;
-        if(i<j){HD[j]=HD[j]+HQ[IH]*D[i];}
-        HD[i]=HD[i]+HQ[IH]*D[j];
+        if(i<j){HD[j]=HD[j]+HQ[IH-1]*D[i];}
+        HD[i]=HD[i]+HQ[IH-1]*D[j];
       }
     }
-    if(ITERC==0){goto b;}
-    if(ITERC<=ITERSW){goto e;}
-    goto l;
+    if(ITERC==0){goto n20;}
+    if(ITERC<=ITERSW){goto n50;}
+    goto n120;
 }

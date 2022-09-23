@@ -7,6 +7,10 @@
       DO 20 I=2,N
       DO 20 J=1,N
    20 Y(I+1,J)=2.0D0*Y(2,J)*Y(I,J)-Y(I-1,J)
+      
+c      PRINT 11, Y(2,3)
+c   11 FORMAT (/4X,'The corresponding F is:'/(5D15.6))
+      
       F=0.0D0
       NP=N+1
       IW=1
@@ -18,5 +22,7 @@
       IF (IW .GT. 0) SUM=SUM+1.0D0/DFLOAT(I*I-2*I)
       IW=-IW
    40 F=F+SUM*SUM
+c      PRINT 11, X(1),X(2)
+c   11 FORMAT (/4X,'The corresponding F is:'/(2X,5D15.6))
       RETURN
       END

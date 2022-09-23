@@ -1,5 +1,50 @@
 #include "newuoa.h"
 
+
+double **matrix_reshape2d(int n, double *w)
+{
+	int i,j,k,m;
+	double **pp;
+	k=malloc_usable_size(w);
+	m=k/sizeof(w[0]);
+	pp=(double **)malloc(n*sizeof(double *));
+	for(i=0;i<n;i++)
+	{
+		pp[i]=(double *)malloc(m*sizeof(double));
+	}
+return pp;
+}
+
+double min2d(double x,double y)
+{
+	double a;
+	a=x<y?x:y;
+	return a;
+}
+
+double max2d(double x,double y)
+{
+	double a;
+	a=x>y?x:y;
+	return a;
+}
+
+double max3d(double x, double y, double z)
+{
+	double a,b;
+	a=x>y?x:y;
+	b=a>z?a:z;
+	return b;
+}
+
+double *slice1d(double *W, int start, int end)
+{	
+	int i,k,m;
+	double *p;
+	p=&W[start];
+	return p;
+}
+
 float *matrix1f(int m)
 {
 	float *p;

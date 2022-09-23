@@ -1,6 +1,6 @@
-#include<newuoa.h>
+#include"newuoa.h"
 
-int biglag(int N, int NPT, double *XOPT, double **XPT, double **BMAT, double **ZMAT, int IDZ, int NDIM, int KNEW, double DELTA, double *D, double ALPHA, double *HCOL, double *GC, double *GD, double *S, double *W){
+double biglag(int N, int NPT, double *XOPT, double **XPT, double **BMAT, double **ZMAT, int IDZ, int NDIM, int KNEW, double DELTA, double *D, double ALPHA, double *HCOL, double *GC, double *GD, double *S, double *W){
     
     /* N is the number of variables.
      NPT is the number of interpolation equations.
@@ -78,7 +78,7 @@ int biglag(int N, int NPT, double *XOPT, double **XPT, double **BMAT, double **Z
     if(SP*DHD<ZERO){SCALE=-SCALE;}
     TEMP=ZERO;
     if(SP*SP>0.99*DD*GG){TEMP=ONE;}
-    double TAU=SCALE*(abs(SP)+HALF*SCALE*abs(DHD));
+    double TAU=SCALE*(fabs(SP)+HALF*SCALE*fabs(DHD));
     if(GG*DELSQ<0.01*TAU*TAU){TEMP=ONE;}
     for(i=0;i<N;i++){
         D[i]=SCALE*D[i];
@@ -131,7 +131,7 @@ h:
     CF4=HALF*CF4-CF1;
 
     // Seek the value of the angle that maximizes the modulus of TAU.
-    double TAUBEG=CF1+CF2+CF3;
+    double TAUBEG=CF1+CF2+CF4;
     double TAUMAX=TAUBEG;
     double TAUOLD=TAUBEG;
     double ANGLE,CTH,STH,TEMPA,TEMPB;
@@ -141,8 +141,8 @@ h:
         ANGLE=(double)i*TEMP;
         CTH=cos(ANGLE);
         STH=sin(ANGLE);
-        TAU=CF1+(CF2+CF4*CTH)+(CF3+CF5*CTH)*STH;
-        if(abs(TAU)>abs(TAUMAX)){
+        TAU=CF1+(CF2+CF4*CTH)*CTH+(CF3+CF5*CTH)*STH;
+        if(fabs(TAU)>fabs(TAUMAX)){
             TAUMAX=TAU;
             ISAVE=i;
             TEMPA=TAUOLD;
@@ -171,8 +171,8 @@ h:
         GD[i]=CTH*GD[i]+STH*W[i];
         S[i]=GC[i]+GD[i];
     }
-    if(abs(TAU)<=1.1*abs(TAUBEG)){goto p;}
+    if(fabs(TAU)<=1.1*fabs(TAUBEG)){goto p;}
     if(ITREC < N){goto h;}
 p:    
-    return 0;
+    return ALPHA;
 }
